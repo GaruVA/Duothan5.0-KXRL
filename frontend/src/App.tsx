@@ -9,6 +9,7 @@ import AdminTeamsPage from './pages/AdminTeamsPage';
 import AdminChallengesPage from './pages/AdminChallengesPage';
 import DashboardPage from './pages/DashboardPage';
 import ChallengePage from './pages/ChallengePage';
+import BuildathonPage from './pages/BuildathonPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminProtectedRoute from './components/AdminProtectedRoute';
 import './App.css';
@@ -60,6 +61,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ChallengePage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/buildathon/:id" 
+              element={
+                <ProtectedRoute>
+                  <BuildathonPage />
                 </ProtectedRoute>
               } 
             />

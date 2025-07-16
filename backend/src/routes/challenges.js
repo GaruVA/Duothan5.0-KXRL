@@ -346,4 +346,64 @@ router.get('/meta/judge0-status', authenticateToken, async (req, res) => {
   }
 });
 
+// @route   POST /api/challenges/:id/submit-flag
+// @desc    Submit and verify flag for a challenge
+// @access  Private (requires authentication)
+router.post('/:id/submit-flag', authenticateToken, async (req, res) => {
+  try {
+    const { flag } = req.body;
+    const challengeId = req.params.id;
+
+    if (!flag || !flag.trim()) {
+      return res.status(400).json({ error: 'Flag is required' });
+    }
+
+    // Get challenge details
+    const challenge = await Challenge.findById(challengeId);
+    if (!challenge) {
+      return res.status(404).json({ error: 'Challenge not found' });
+    }
+
+    // Check if challenge is active
+    if (!challenge.isActive) {
+      return res.status(400).json({ error: 'Challenge is not active' });
+    }
+
+    // Verify flag
+    if (flag.trim() === challenge.flag.trim()) {
+      // Flag is correct, check if team has solved the algorithmic challenge
+      const hasCorrectSubmission = await Submission.findOne({
+        teamId: req.team._id,
+        challengeId: challengeId,
+        isCorrect: true
+      });
+
+      if (!hasCorrectSubmission) {
+        return res.status(400).json({ 
+          error: 'You must solve the algorithmic challenge first before submitting the flag' 
+        });
+      }
+
+      // Flag is correct and team has solved the challenge
+      res.json({
+        success: true,
+        message: 'Flag verified successfully! Buildathon challenge unlocked.',
+        buildathonProblem: challenge.buildathonProblem
+      });
+    } else {
+      // Flag is incorrect
+      res.status(400).json({
+        success: false,
+        error: 'Incorrect flag. Please try again.'
+      });
+    }
+  } catch (error) {
+    console.error('Flag submission error:', error);
+    res.status(500).json({ 
+      error: 'Failed to verify flag',
+      message: error.message 
+    });
+  }
+});
+
 module.exports = router;

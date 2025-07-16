@@ -75,6 +75,11 @@ const ChallengePage = () => {
   const [isExecuting, setIsExecuting] = useState(false);
   const [languages, setLanguages] = useState<any[]>([]);
   
+  // Flag submission state
+  const [flag, setFlag] = useState('');
+  const [isSubmittingFlag, setIsSubmittingFlag] = useState(false);
+  const [flagResult, setFlagResult] = useState<any>(null);
+  
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -191,6 +196,50 @@ const ChallengePage = () => {
       setLanguages(langs);
     } catch (error) {
       console.error('Failed to load languages:', error);
+    }
+  };
+
+  // Flag submission function
+  const handleSubmitFlag = async () => {
+    if (!flag.trim()) {
+      alert('Please enter a flag');
+      return;
+    }
+
+    if (!id) {
+      alert('Challenge ID not found');
+      return;
+    }
+
+    setIsSubmittingFlag(true);
+    setFlagResult(null);
+
+    try {
+      const result = await challengesAPI.submitFlag(id, flag);
+      setFlagResult(result);
+      
+      if (result.success) {
+        // Show success popup and offer to navigate to buildathon
+        const confirmed = window.confirm(
+          `🎉 Congratulations! Flag verified successfully!\n\n` +
+          `The Buildathon challenge is now unlocked!\n\n` +
+          `Click OK to proceed to the Buildathon page, or Cancel to stay here.`
+        );
+        
+        if (confirmed) {
+          // Navigate to buildathon page (you may need to adjust this route)
+          navigate(`/buildathon/${id}`);
+        }
+      } else {
+        alert(result.error || 'Incorrect flag. Please try again.');
+      }
+    } catch (error: any) {
+      console.error('Flag submission error:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to submit flag';
+      alert(errorMessage);
+      setFlagResult({ success: false, error: errorMessage });
+    } finally {
+      setIsSubmittingFlag(false);
     }
   };
 
@@ -558,6 +607,103 @@ const ChallengePage = () => {
           </div>
         </div>
       </main>
+
+      {/* Flag Submission Section */}
+      <section className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div className="px-4 py-6 sm:px-0">
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-2xl flex items-center">
+                <svg className="h-6 w-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.414-4.414a2 2 0 00-2.828 0L12 5.172 9.414 2.586a2 2 0 00-2.828 0l-7.071 7.071a2 2 0 000 2.828L2.929 14.9a2 2 0 002.828 0L8 12.657l4.243 4.243a2 2 0 002.828 0l7.071-7.071a2 2 0 000-2.828L19.728 6.486z" />
+                </svg>
+                Flag Submission
+              </CardTitle>
+              <p className="text-gray-600">Submit the correct flag to unlock the Buildathon challenge</p>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="flag" className="block text-sm font-medium text-gray-700 mb-2">
+                    Enter Flag
+                  </label>
+                  <div className="flex space-x-4">
+                    <input
+                      type="text"
+                      id="flag"
+                      value={flag}
+                      onChange={(e) => setFlag(e.target.value)}
+                      placeholder="CTF{...}"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 font-mono"
+                      disabled={isSubmittingFlag}
+                    />
+                    <Button
+                      onClick={handleSubmitFlag}
+                      disabled={isSubmittingFlag || !flag.trim()}
+                      className="bg-green-600 hover:bg-green-700 disabled:opacity-50 px-6"
+                    >
+                      {isSubmittingFlag ? (
+                        <>
+                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Verifying...
+                        </>
+                      ) : (
+                        <>
+                          <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4" />
+                          </svg>
+                          Submit Flag
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Flag submission result */}
+                {flagResult && (
+                  <div className={`p-4 rounded-md ${flagResult.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
+                    {flagResult.success ? (
+                      <div className="flex items-center">
+                        <svg className="h-5 w-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4" />
+                        </svg>
+                        <span className="text-green-800 font-medium">{flagResult.message}</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center">
+                        <svg className="h-5 w-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        <span className="text-red-800 font-medium">{flagResult.error}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+                  <div className="flex items-start">
+                    <svg className="h-5 w-5 text-blue-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                      <h4 className="text-sm font-medium text-blue-800 mb-1">How to get the flag:</h4>
+                      <ul className="text-sm text-blue-700 space-y-1">
+                        <li>• First, solve the algorithmic challenge above using the code executor</li>
+                        <li>• The flag is typically hidden in the problem description, test cases, or revealed after solving</li>
+                        <li>• Flags usually follow the format: CTF{"{...}"}</li>
+                        <li>• Once verified, you'll unlock the Buildathon challenge</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
 
       {/* Code Executor Section */}
       <section className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">

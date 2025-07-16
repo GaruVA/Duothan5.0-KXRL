@@ -103,6 +103,11 @@ export const challengesAPI = {
   getChallengeById: async (id: string): Promise<any> => {
     const response = await api.get(`/challenges/${id}`);
     return response.data;
+  },
+
+  submitFlag: async (challengeId: string, flag: string): Promise<any> => {
+    const response = await api.post(`/challenges/${challengeId}/submit-flag`, { flag });
+    return response.data;
   }
 };
 
