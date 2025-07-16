@@ -1,3 +1,33 @@
 @import "tailwindcss";
 
-/* Add any custom CSS here */
+/* Selective reset - only reset body and html, not all elements */
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+/* Custom CSS variables for better theming */
+:root {
+  --primary: #2563eb;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0f172a;
+  --muted: #f8fafc;
+  --muted-foreground: #64748b;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #2563eb;
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+}
