@@ -42,11 +42,7 @@ const DashboardPage = () => {
   };
 
   const handleChallengeClick = (challengeId: string) => {
-    // TODO: Navigate to challenge detail page when route is created
-    // navigate(`/challenge/${challengeId}`);
-    
-    // For now, show an alert with the challenge ID
-    alert(`Challenge selected: ${challengeId}\n\nChallenge detail page will be implemented soon!`);
+    navigate(`/challenge/${challengeId}`);
   };
 
   useEffect(() => {
@@ -97,13 +93,13 @@ const DashboardPage = () => {
               </div>
               <div className="ml-4">
                 <h1 className="text-2xl font-bold text-gray-900">Challenge Dashboard</h1>
-                <p className="text-sm text-gray-500">Welcome back, {user?.teamName}!</p>
+                <p className="text-sm text-indigo-600 font-medium">Solve the challenge, unveil the Buildation</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
               <div className="text-right">
                 <p className="text-sm font-medium text-gray-900">{user?.teamName}</p>
-                <p className="text-xs text-gray-500">{user?.email}</p>
+                <p className="text-xs text-gray-500">Welcome back!</p>
               </div>
               <button
                 onClick={handleLogout}

@@ -241,7 +241,7 @@ router.get('/:id/leaderboard', authenticateToken, async (req, res) => {
     const leaderboard = await Submission.aggregate([
       {
         $match: {
-          challengeId: require('mongoose').Types.ObjectId(id),
+          challengeId: new require('mongoose').Types.ObjectId(id),
           isCorrect: true
         }
       },

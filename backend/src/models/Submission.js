@@ -149,7 +149,7 @@ submissionSchema.statics.getBestScore = function(teamId, challengeId) {
 // Static method to get submission statistics for a challenge
 submissionSchema.statics.getChallengeStats = async function(challengeId) {
   const stats = await this.aggregate([
-    { $match: { challengeId: mongoose.Types.ObjectId(challengeId) } },
+    { $match: { challengeId: new mongoose.Types.ObjectId(challengeId) } },
     {
       $group: {
         _id: null,
