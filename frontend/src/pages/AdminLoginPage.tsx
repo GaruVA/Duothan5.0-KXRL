@@ -1,16 +1,13 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 
-const LoginPage = () => {
+const AdminLoginPage = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const [formError, setFormError] = useState('');
-
-  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,18 +32,18 @@ const LoginPage = () => {
       return;
     }
 
-    if (!formData.email.includes('@')) {
-      setFormError('Please enter a valid email address');
-      setIsLoading(false);
-      return;
-    }
-
+    // For now, we'll just show a placeholder message
+    // In a real implementation, you would call an admin authentication API
     try {
-      const result = await login(formData);
-      if (result.success) {
-        navigate('/dashboard');
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Placeholder logic - in real implementation, verify admin credentials
+      if (formData.email === 'admin@oasis.com' && formData.password === 'admin') {
+        // Navigate to admin dashboard (to be implemented)
+        navigate('/admin/dashboard');
       } else {
-        setFormError(result.error || 'Login failed');
+        setFormError('Invalid admin credentials');
       }
     } catch (error) {
       setFormError('An unexpected error occurred');
@@ -56,24 +53,23 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <div className="mx-auto h-12 w-12 bg-indigo-600 rounded-full flex items-center justify-center shadow-lg">
+          <div className="mx-auto h-12 w-12 bg-red-600 rounded-full flex items-center justify-center">
             <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
           </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Team Login
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
+            Admin Login
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Sign in to access algorithmic challenges
+          <p className="mt-2 text-center text-sm text-gray-300">
+            Administrative access to the platform
           </p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="email" className="sr-only">
@@ -85,8 +81,8 @@ const LoginPage = () => {
                 type="email"
                 autoComplete="email"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Team email address"
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-red-500 focus:border-red-500 focus:z-10 sm:text-sm"
+                placeholder="Admin email address"
                 value={formData.email}
                 onChange={handleChange}
                 disabled={isLoading}
@@ -102,7 +98,7 @@ const LoginPage = () => {
                 type="password"
                 autoComplete="current-password"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-red-500 focus:border-red-500 focus:z-10 sm:text-sm"
                 placeholder="Password"
                 value={formData.password}
                 onChange={handleChange}
@@ -130,7 +126,7 @@ const LoginPage = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <div className="flex items-center">
@@ -141,27 +137,35 @@ const LoginPage = () => {
                   Signing in...
                 </div>
               ) : (
-                'Sign in'
+                'Admin Sign In'
               )}
             </button>
           </div>
 
           <div className="text-center">
-            <p className="text-sm text-gray-600">
-              Don't have an account?{' '}
+            <p className="text-sm text-gray-300">
+              Not an admin?{' '}
               <Link
-                to="/register"
-                className="font-medium text-indigo-600 hover:text-indigo-500"
+                to="/login"
+                className="font-medium text-red-400 hover:text-red-300"
               >
-                Register your team
+                Team Login
               </Link>
             </p>
           </div>
+
+          <div className="text-center">
+            <Link
+              to="/"
+              className="text-sm text-gray-400 hover:text-gray-300"
+            >
+              ← Back to Home
+            </Link>
+          </div>
         </form>
-        </div>
       </div>
     </div>
   );
 };
 
-export default LoginPage;
+export default AdminLoginPage;
