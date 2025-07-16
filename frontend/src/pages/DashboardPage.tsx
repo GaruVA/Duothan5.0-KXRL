@@ -2,19 +2,59 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { challengesAPI } from '../api/auth';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Badge } from '../components/ui/badge';
+
+interface Challenge {
+  _id: string;
+  title: string;
+  description: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard' | 'Expert';
+  category: string;
+  points: number;
+  tags: string[];
+  timeLimit: number;
+  isActive: boolean;
+  submissionCount: number;
+  solvedCount: number;
+}
 
 const DashboardPage = () => {
-  const [challenges, setChallenges] = useState<any>(null);
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'Easy':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'Medium':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'Hard':
+        return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'Expert':
+        return 'bg-red-100 text-red-800 border-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const handleChallengeClick = (challengeId: string) => {
+    // TODO: Navigate to challenge detail page when route is created
+    // navigate(`/challenge/${challengeId}`);
+    
+    // For now, show an alert with the challenge ID
+    alert(`Challenge selected: ${challengeId}\n\nChallenge detail page will be implemented soon!`);
+  };
+
   useEffect(() => {
     const fetchChallenges = async () => {
       try {
         const response = await challengesAPI.getAllChallenges();
-        setChallenges(response);
+        // Assuming the API returns { challenges: Challenge[], message: string }
+        setChallenges(response.challenges || response);
       } catch (error: any) {
         setError(error.response?.data?.message || 'Failed to fetch challenges');
       } finally {
@@ -140,7 +180,7 @@ const DashboardPage = () => {
           {/* Challenges Section */}
           <div className="bg-white overflow-hidden shadow rounded-lg">
             <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-6">
                 Available Challenges
               </h3>
               
@@ -157,26 +197,84 @@ const DashboardPage = () => {
                     </div>
                   </div>
                 </div>
+              ) : challenges.length === 0 ? (
+                <div className="text-center py-12">
+                  <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">No challenges available</h3>
+                  <p className="mt-1 text-sm text-gray-500">Check back later for new challenges.</p>
+                </div>
               ) : (
-                <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm text-blue-800">
-                        🎉 Congratulations! Your team authentication is working perfectly. 
-                        The backend confirmed your access to challenges.
-                      </p>
-                      {challenges && (
-                        <p className="text-sm text-blue-800 mt-2">
-                          <strong>Server Response:</strong> {challenges.message}
-                        </p>
-                      )}
-                    </div>
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {challenges.map((challenge) => (
+                    <Card 
+                      key={challenge._id} 
+                      className="cursor-pointer hover:shadow-lg transition-shadow duration-200 border-gray-200"
+                      onClick={() => handleChallengeClick(challenge._id)}
+                    >
+                      <CardHeader className="pb-4">
+                        <div className="flex items-start justify-between">
+                          <CardTitle className="text-lg font-semibold text-gray-900 line-clamp-2">
+                            {challenge.title}
+                          </CardTitle>
+                          <Badge className={`ml-2 flex-shrink-0 ${getDifficultyColor(challenge.difficulty)}`}>
+                            {challenge.difficulty}
+                          </Badge>
+                        </div>
+                        <CardDescription className="text-sm text-gray-600 line-clamp-3 mt-2">
+                          {challenge.description}
+                        </CardDescription>
+                      </CardHeader>
+                      
+                      <CardContent className="pt-0">
+                        <div className="space-y-3">
+                          {/* Category and Points */}
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              {challenge.category}
+                            </span>
+                            <span className="font-medium text-gray-900">
+                              {challenge.points} pts
+                            </span>
+                          </div>
+                          
+                          {/* Tags */}
+                          {challenge.tags && challenge.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                              {challenge.tags.slice(0, 3).map((tag, index) => (
+                                <span 
+                                  key={index}
+                                  className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                              {challenge.tags.length > 3 && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                                  +{challenge.tags.length - 3} more
+                                </span>
+                              )}
+                            </div>
+                          )}
+                          
+                          {/* Stats */}
+                          <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-100">
+                            <div className="flex items-center">
+                              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              {challenge.timeLimit}s
+                            </div>
+                            <div className="flex items-center space-x-3">
+                              <span>{challenge.submissionCount} submissions</span>
+                              <span>{challenge.solvedCount} solved</span>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
               )}
             </div>
