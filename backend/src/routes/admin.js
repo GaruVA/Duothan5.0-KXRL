@@ -176,6 +176,159 @@ router.get('/teams/:id/submissions', async (req, res) => {
   }
 });
 
+// @route   GET /api/admin/teams/:id
+// @desc    Get single team with detailed information
+// @access  Private (Admin only)
+router.get('/teams/:id', async (req, res) => {
+  try {
+    const team = await Team.findById(req.params.id).select('-password');
+    
+    if (!team) {
+      return res.status(404).json({ message: 'Team not found' });
+    }
+
+    // Get team statistics
+    const [totalSubmissions, solvedChallenges, submissions] = await Promise.all([
+      Submission.countDocuments({ teamId: req.params.id }),
+      Submission.countDocuments({ teamId: req.params.id, isCorrect: true }),
+      Submission.find({ teamId: req.params.id })
+        .populate('challengeId', 'title difficulty')
+        .sort({ createdAt: -1 })
+        .limit(10)
+    ]);
+
+    const teamData = {
+      ...team.toObject(),
+      totalSubmissions,
+      solvedChallenges,
+      points: solvedChallenges * 100,
+      recentSubmissions: submissions
+    };
+
+    res.json(teamData);
+  } catch (error) {
+    console.error('Team fetch error:', error);
+    res.status(500).json({ message: 'Failed to fetch team' });
+  }
+});
+
+// @route   PUT /api/admin/teams/:id
+// @desc    Update team information
+// @access  Private (Admin only)
+router.put('/teams/:id', async (req, res) => {
+  try {
+    const { teamName, email, members, isActive } = req.body;
+    
+    const team = await Team.findByIdAndUpdate(
+      req.params.id,
+      { teamName, email, members, isActive },
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    if (!team) {
+      return res.status(404).json({ message: 'Team not found' });
+    }
+
+    res.json({
+      message: 'Team updated successfully',
+      team
+    });
+  } catch (error) {
+    console.error('Team update error:', error);
+    if (error.code === 11000) {
+      return res.status(400).json({ message: 'Team name or email already exists' });
+    }
+    res.status(500).json({ message: 'Failed to update team' });
+  }
+});
+
+// @route   DELETE /api/admin/teams/:id
+// @desc    Delete team and all related data
+// @access  Private (Admin only)
+router.delete('/teams/:id', async (req, res) => {
+  try {
+    const team = await Team.findByIdAndDelete(req.params.id);
+    
+    if (!team) {
+      return res.status(404).json({ message: 'Team not found' });
+    }
+
+    // Delete all submissions by this team
+    await Submission.deleteMany({ teamId: req.params.id });
+
+    res.json({ message: 'Team and all related data deleted successfully' });
+  } catch (error) {
+    console.error('Team deletion error:', error);
+    res.status(500).json({ message: 'Failed to delete team' });
+  }
+});
+
+// @route   POST /api/admin/teams/:id/toggle-status
+// @desc    Toggle team active status
+// @access  Private (Admin only)
+router.post('/teams/:id/toggle-status', async (req, res) => {
+  try {
+    const team = await Team.findById(req.params.id);
+    
+    if (!team) {
+      return res.status(404).json({ message: 'Team not found' });
+    }
+
+    team.isActive = !team.isActive;
+    await team.save();
+
+    const teamData = team.toObject();
+    delete teamData.password;
+
+    res.json({
+      message: `Team ${team.isActive ? 'activated' : 'deactivated'} successfully`,
+      team: teamData
+    });
+  } catch (error) {
+    console.error('Team toggle error:', error);
+    res.status(500).json({ message: 'Failed to toggle team status' });
+  }
+});
+
+// @route   POST /api/admin/teams
+// @desc    Create new team (manual team creation by admin)
+// @access  Private (Admin only)
+router.post('/teams', async (req, res) => {
+  try {
+    const { teamName, email, password, members } = req.body;
+    
+    // Check if team already exists
+    const existingTeam = await Team.findOne({
+      $or: [{ teamName }, { email }]
+    });
+    
+    if (existingTeam) {
+      return res.status(400).json({ message: 'Team name or email already exists' });
+    }
+
+    const team = new Team({
+      teamName,
+      email,
+      password,
+      members: members || [],
+      isActive: true
+    });
+
+    await team.save();
+
+    const teamData = team.toObject();
+    delete teamData.password;
+
+    res.status(201).json({
+      message: 'Team created successfully',
+      team: teamData
+    });
+  } catch (error) {
+    console.error('Team creation error:', error);
+    res.status(500).json({ message: 'Failed to create team' });
+  }
+});
+
 // CHALLENGE MANAGEMENT ROUTES
 
 // @route   GET /api/admin/challenges
