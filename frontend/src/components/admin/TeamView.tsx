@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Team, Submission } from './team-types';
 import { teamAPI } from './team-api';
-import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Input } from '../ui/input';
 
 interface TeamViewProps {
   team: Team;
@@ -63,29 +60,37 @@ export const TeamView: React.FC<TeamViewProps> = ({ team, onEdit, onClose }) => 
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
+      <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200/50">
+        <div className="px-6 py-4 border-b border-gray-200/50">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-xl flex items-center gap-3">
-              {team.teamName}
-              <Badge variant={team.isActive ? "default" : "secondary"}>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                {team.teamName}
+              </h1>
+              <Badge variant={team.isActive ? "default" : "secondary"} className={team.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}>
                 {team.isActive ? 'Active' : 'Inactive'}
               </Badge>
-            </CardTitle>
+            </div>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => onEdit(team)}>
+              <button
+                onClick={() => onEdit(team)}
+                className="px-4 py-2 text-sm font-medium text-purple-600 hover:text-purple-700 border border-purple-200 hover:border-purple-300 rounded-lg transition-all duration-200 hover:bg-purple-50"
+              >
                 Edit Team
-              </Button>
-              <Button variant="outline" onClick={onClose}>
+              </button>
+              <button
+                onClick={onClose}
+                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-700 border border-gray-300 hover:border-gray-400 rounded-lg transition-all duration-200 hover:bg-gray-50"
+              >
                 Close
-              </Button>
+              </button>
             </div>
           </div>
-        </CardHeader>
-        <CardContent>
+        </div>
+        <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h3 className="font-semibold mb-3">Team Information</h3>
+              <h3 className="font-semibold text-gray-900 mb-3">Team Information</h3>
               <div className="space-y-2">
                 <p><span className="font-medium">Email:</span> {team.email}</p>
                 <p><span className="font-medium">Created:</span> {new Date(team.createdAt).toLocaleDateString()}</p>
@@ -94,22 +99,22 @@ export const TeamView: React.FC<TeamViewProps> = ({ team, onEdit, onClose }) => 
             </div>
 
             <div>
-              <h3 className="font-semibold mb-3">Statistics</h3>
+              <h3 className="font-semibold text-gray-900 mb-3">Statistics</h3>
               <div className="space-y-2">
-                <p><span className="font-medium">Total Submissions:</span> {team.totalSubmissions || 0}</p>
-                <p><span className="font-medium">Solved Challenges:</span> {team.solvedChallenges || 0}</p>
-                <p><span className="font-medium">Points:</span> {team.points || 0}</p>
+                <p><span className="font-medium">Total Submissions:</span> <span className="text-blue-600 font-semibold">{team.totalSubmissions || 0}</span></p>
+                <p><span className="font-medium">Solved Challenges:</span> <span className="text-green-600 font-semibold">{team.solvedChallenges || 0}</span></p>
+                <p><span className="font-medium">Points:</span> <span className="text-purple-600 font-semibold">{team.points || 0}</span></p>
               </div>
             </div>
           </div>
 
           <div className="mt-6">
-            <h3 className="font-semibold mb-3">Team Members ({team.members.length})</h3>
+            <h3 className="font-semibold text-gray-900 mb-3">Team Members ({team.members.length})</h3>
             {team.members.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {team.members.map((member, index) => (
-                  <div key={index} className="bg-gray-50 p-3 rounded-lg">
-                    <p className="font-medium">{member.name}</p>
+                  <div key={index} className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-200">
+                    <p className="font-medium text-gray-900">{member.name}</p>
                     <p className="text-sm text-gray-600">{member.email}</p>
                   </div>
                 ))}
@@ -118,24 +123,27 @@ export const TeamView: React.FC<TeamViewProps> = ({ team, onEdit, onClose }) => 
               <p className="text-gray-500">No team members added</p>
             )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <Card>
-        <CardHeader>
+      <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200/50">
+        <div className="px-6 py-4 border-b border-gray-200/50">
           <div className="flex items-center justify-between">
-            <CardTitle>Submission History</CardTitle>
+            <h2 className="text-xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Submission History
+            </h2>
             <div className="flex items-center gap-2">
-              <Input
+              <input
+                type="text"
                 placeholder="Search submissions..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-64"
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 w-64"
               />
             </div>
           </div>
-        </CardHeader>
-        <CardContent>
+        </div>
+        <div className="p-6">
           {submissionsLoading ? (
             <div className="space-y-4">
               {[...Array(5)].map((_, i) => (
@@ -152,10 +160,10 @@ export const TeamView: React.FC<TeamViewProps> = ({ team, onEdit, onClose }) => 
           ) : (
             <div className="space-y-4">
               {filteredSubmissions.map((submission) => (
-                <div key={submission._id} className="border rounded-lg p-4 bg-white">
+                <div key={submission._id} className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 border border-blue-200">
                   <div className="flex items-start justify-between mb-3">
                     <div>
-                      <h4 className="font-medium">{submission.challengeId.title}</h4>
+                      <h4 className="font-medium text-gray-900">{submission.challengeId.title}</h4>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge className={getDifficultyColor(submission.challengeId.difficulty)}>
                           {submission.challengeId.difficulty}
@@ -189,7 +197,7 @@ export const TeamView: React.FC<TeamViewProps> = ({ team, onEdit, onClose }) => 
                   </div>
 
                   {submission.testCases && submission.testCases.length > 0 && (
-                    <div className="mt-3 pt-3 border-t">
+                    <div className="mt-3 pt-3 border-t border-blue-200">
                       <p className="text-sm font-medium mb-2">Test Cases:</p>
                       <div className="flex flex-wrap gap-2">
                         {submission.testCases.map((testCase, index) => (
@@ -212,29 +220,27 @@ export const TeamView: React.FC<TeamViewProps> = ({ team, onEdit, onClose }) => 
 
           {totalPages > 1 && (
             <div className="flex justify-center items-center gap-2 mt-6">
-              <Button
-                variant="outline"
-                size="sm"
+              <button
                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
+                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-700 border border-gray-300 hover:border-gray-400 rounded-lg transition-all duration-200 disabled:opacity-50"
               >
                 Previous
-              </Button>
+              </button>
               <span className="text-sm text-gray-500">
                 Page {currentPage} of {totalPages}
               </span>
-              <Button
-                variant="outline"
-                size="sm"
+              <button
                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                 disabled={currentPage === totalPages}
+                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-700 border border-gray-300 hover:border-gray-400 rounded-lg transition-all duration-200 disabled:opacity-50"
               >
                 Next
-              </Button>
+              </button>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };

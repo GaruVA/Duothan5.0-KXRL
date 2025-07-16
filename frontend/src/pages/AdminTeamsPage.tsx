@@ -1,19 +1,58 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { TeamCRUD } from '../components/admin/TeamCRUD';
+import { Users, ArrowLeft, LogOut } from 'lucide-react';
 
 export const AdminTeamsPage: React.FC = () => {
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Team Management</h1>
-          <p className="text-gray-600">
-            Manage teams, view submission history, and monitor team performance.
-          </p>
-        </div>
+  const navigate = useNavigate();
 
-        <TeamCRUD />
+  const handleLogout = () => {
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminData');
+    navigate('/admin/login');
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {/* Header */}
+      <div className="bg-white/80 backdrop-blur-sm shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-6">
+            <div className="flex items-center">
+              <button
+                onClick={() => navigate('/admin/dashboard')}
+                className="mr-4 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <ArrowLeft className="w-6 h-6" />
+              </button>
+              <div className="flex-shrink-0">
+                <div className="h-10 w-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
+                  <Users className="h-6 w-6 text-white" />
+                </div>
+              </div>
+              <div className="ml-4">
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  OASIS Team Management
+                </h1>
+                <p className="text-sm text-gray-500">Manage teams, view submission history, and monitor team performance</p>
+              </div>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 shadow-md hover:shadow-lg"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
       </div>
+
+      <main className="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
+        <div className="px-4 sm:px-0">
+          <TeamCRUD />
+        </div>
+      </main>
     </div>
   );
 };

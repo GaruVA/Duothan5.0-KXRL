@@ -5,9 +5,6 @@ import { TeamList } from './TeamList';
 import { TeamForm } from './TeamForm';
 import { TeamView } from './TeamView';
 import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Select } from '../ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 
 type ViewMode = 'list' | 'create' | 'edit' | 'view';
 
@@ -139,34 +136,43 @@ export const TeamCRUD: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
+      <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200/50">
+        <div className="px-6 py-5 border-b border-gray-200/50">
           <div className="flex items-center justify-between">
-            <CardTitle>Teams ({totalItems})</CardTitle>
-            <Button onClick={handleCreate}>
+            <div>
+              <h2 className="text-xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Teams ({totalItems})
+              </h2>
+              <p className="text-sm text-gray-500 mt-1">Manage and monitor all registered teams</p>
+            </div>
+            <button
+              onClick={handleCreate}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-md hover:shadow-lg"
+            >
               Create New Team
-            </Button>
+            </button>
           </div>
-        </CardHeader>
-        <CardContent>
+        </div>
+        <div className="p-6">
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <div className="flex-1">
-              <Input
+              <input
+                type="text"
                 placeholder="Search teams..."
                 value={filters.search}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="w-full"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               />
             </div>
-            <Select
+            <select
               value={filters.isActive}
               onChange={(e) => handleFilterChange('isActive', e.target.value)}
-              className="w-full sm:w-48"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 w-full sm:w-48"
             >
               <option value="">All Status</option>
               <option value="true">Active</option>
               <option value="false">Inactive</option>
-            </Select>
+            </select>
           </div>
 
           <TeamList
@@ -201,8 +207,8 @@ export const TeamCRUD: React.FC = () => {
               </Button>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };

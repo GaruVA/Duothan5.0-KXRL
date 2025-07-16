@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, LogOut, FileText } from 'lucide-react';
 import ChallengeCRUD from '../components/admin/ChallengeCRUD';
 
 const AdminChallengesPage = () => {
@@ -11,44 +12,43 @@ const AdminChallengesPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header */}
-      <div className="bg-white shadow">
+      <div className="bg-white/80 backdrop-blur-sm shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
               <button
                 onClick={() => navigate('/admin/dashboard')}
-                className="mr-4 text-gray-400 hover:text-gray-600"
+                className="mr-4 text-gray-400 hover:text-gray-600 transition-colors"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
+                <ArrowLeft className="w-6 h-6" />
               </button>
               <div className="flex-shrink-0">
-                <div className="h-8 w-8 bg-yellow-600 rounded-full flex items-center justify-center">
-                  <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
+                <div className="h-10 w-10 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center">
+                  <FileText className="h-6 w-6 text-white" />
                 </div>
               </div>
               <div className="ml-4">
-                <h1 className="text-2xl font-bold text-gray-900">OASIS Challenge Management</h1>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent">
+                  OASIS Challenge Management
+                </h1>
                 <p className="text-sm text-gray-500">Create and manage algorithmic & buildathon challenges</p>
               </div>
             </div>
             <button
               onClick={handleLogout}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 shadow-md hover:shadow-lg"
             >
-              Logout
+              <LogOut className="w-4 h-4" />
+              <span>Logout</span>
             </button>
           </div>
         </div>
       </div>
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
+      <main className="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
+        <div className="px-4 sm:px-0">
           <ChallengeCRUD />
         </div>
       </main>
