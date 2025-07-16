@@ -185,7 +185,7 @@ const ChallengePage = () => {
               </div>
               <div className="ml-4">
                 <h1 className="text-2xl font-bold text-gray-900">Challenge Details</h1>
-                <p className="text-sm text-indigo-600 font-medium">Solve the challenge, unveil the Buildation</p>
+                <p className="text-sm text-indigo-600 font-medium">Solve the challenge, unveil the Buildathon</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
