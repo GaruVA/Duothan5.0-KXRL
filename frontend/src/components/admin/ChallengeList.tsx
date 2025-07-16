@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Select } from '../ui/select';
-import { Badge } from '../ui/badge';
 import type { ChallengeListItem } from './types';
 
 interface ChallengeListProps {
@@ -64,11 +62,11 @@ const ChallengeList: React.FC<ChallengeListProps> = ({ onEdit, onDelete, onView 
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'Easy': return 'bg-green-100 text-green-800';
-      case 'Medium': return 'bg-yellow-100 text-yellow-800';
-      case 'Hard': return 'bg-orange-100 text-orange-800';
-      case 'Expert': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'Easy': return 'bg-green-100 text-green-800 border-green-200';
+      case 'Medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'Hard': return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'Expert': return 'bg-red-100 text-red-800 border-red-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
@@ -80,7 +78,7 @@ const ChallengeList: React.FC<ChallengeListProps> = ({ onEdit, onDelete, onView 
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     );
   }
@@ -88,19 +86,21 @@ const ChallengeList: React.FC<ChallengeListProps> = ({ onEdit, onDelete, onView 
   return (
     <div>
       {/* Filters */}
-      <Card className="p-4 mb-6">
+      <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-sm border border-gray-200/50 p-6 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <Input
               placeholder="Search challenges..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              className="focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
           <div>
             <Select
               value={difficultyFilter}
               onChange={(e) => setDifficultyFilter(e.target.value)}
+              className="focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">All Difficulties</option>
               <option value="Easy">Easy</option>
@@ -114,69 +114,86 @@ const ChallengeList: React.FC<ChallengeListProps> = ({ onEdit, onDelete, onView 
               placeholder="Filter by category..."
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
+              className="focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
           <div className="flex justify-end">
-            <span className="text-sm text-gray-600 self-center">
+            <span className="text-sm text-gray-600 self-center font-medium">
               {totalChallenges} challenge(s) found
             </span>
           </div>
         </div>
-      </Card>
+      </div>
 
       {/* Challenge List */}
       <div className="space-y-4">
         {challenges.length === 0 ? (
-          <Card className="p-8 text-center">
-            <p className="text-gray-500">No challenges found. Create your first challenge!</p>
-          </Card>
+          <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-sm border border-gray-200/50 p-12 text-center">
+            <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No challenges found</h3>
+            <p className="text-gray-500">Create your first challenge to get started!</p>
+          </div>
         ) : (
           challenges.map((challenge) => (
-            <Card key={challenge._id} className="p-6">
+            <div key={challenge._id} className="bg-white/80 backdrop-blur-sm rounded-lg shadow-sm border border-gray-200/50 p-6 hover:shadow-md transition-shadow duration-200">
               <div className="flex justify-between items-start">
                 <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-lg font-semibold">{challenge.title}</h3>
-                    <Badge className={getDifficultyColor(challenge.difficulty)}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {challenge.title}
+                    </h3>
+                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${getDifficultyColor(challenge.difficulty)}`}>
                       {challenge.difficulty}
-                    </Badge>
-                    <Badge variant={challenge.isActive ? "default" : "secondary"}>
+                    </span>
+                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+                      challenge.isActive 
+                        ? 'bg-green-100 text-green-800 border-green-200' 
+                        : 'bg-gray-100 text-gray-600 border-gray-200'
+                    }`}>
                       {challenge.isActive ? 'Active' : 'Inactive'}
-                    </Badge>
+                    </span>
                   </div>
                   
-                  <p className="text-gray-600 mb-3 line-clamp-2">{challenge.description}</p>
+                  <p className="text-gray-600 mb-4 line-clamp-2">{challenge.description}</p>
                   
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <span className="text-sm bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full">
                       {challenge.category}
                     </span>
                     {challenge.tags.slice(0, 3).map((tag: string, index: number) => (
-                      <span key={index} className="text-sm bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                      <span key={index} className="text-sm bg-gray-100 text-gray-700 px-2.5 py-0.5 rounded-full">
                         {tag}
                       </span>
                     ))}
                     {challenge.tags.length > 3 && (
-                      <span className="text-sm text-gray-500">+{challenge.tags.length - 3} more</span>
+                      <span className="text-sm text-gray-500 px-2.5 py-0.5">+{challenge.tags.length - 3} more</span>
                     )}
                   </div>
                   
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
                     <div>
-                      <span className="font-medium">Points:</span> {challenge.points}
+                      <span className="text-gray-500">Points:</span>
+                      <div className="font-medium text-gray-900">{challenge.points}</div>
                     </div>
                     <div>
-                      <span className="font-medium">Submissions:</span> {challenge.submissionCount}
+                      <span className="text-gray-500">Submissions:</span>
+                      <div className="font-medium text-gray-900">{challenge.submissionCount}</div>
                     </div>
                     <div>
-                      <span className="font-medium">Solved:</span> {challenge.solvedCount}
+                      <span className="text-gray-500">Solved:</span>
+                      <div className="font-medium text-gray-900">{challenge.solvedCount}</div>
                     </div>
                     <div>
-                      <span className="font-medium">Success Rate:</span> {getSuccessRate(challenge)}%
+                      <span className="text-gray-500">Success Rate:</span>
+                      <div className="font-medium text-gray-900">{getSuccessRate(challenge)}%</div>
                     </div>
                   </div>
                   
-                  <div className="text-xs text-gray-500 mt-2">
+                  <div className="text-xs text-gray-500">
                     Created: {new Date(challenge.createdAt).toLocaleDateString()}
                     {challenge.updatedAt !== challenge.createdAt && (
                       <span> • Updated: {new Date(challenge.updatedAt).toLocaleDateString()}</span>
@@ -187,11 +204,12 @@ const ChallengeList: React.FC<ChallengeListProps> = ({ onEdit, onDelete, onView 
                   </div>
                 </div>
                 
-                <div className="flex flex-col gap-2 ml-4">
+                <div className="flex flex-col gap-2 ml-6">
                   <Button
                     onClick={() => onView(challenge)}
                     variant="outline"
                     size="sm"
+                    className="text-blue-600 border-blue-200 hover:bg-blue-50"
                   >
                     View
                   </Button>
@@ -199,6 +217,7 @@ const ChallengeList: React.FC<ChallengeListProps> = ({ onEdit, onDelete, onView 
                     onClick={() => onEdit(challenge)}
                     variant="outline"
                     size="sm"
+                    className="text-gray-600 border-gray-200 hover:bg-gray-50"
                   >
                     Edit
                   </Button>
@@ -206,30 +225,31 @@ const ChallengeList: React.FC<ChallengeListProps> = ({ onEdit, onDelete, onView 
                     onClick={() => handleDelete(challenge._id)}
                     variant="outline"
                     size="sm"
-                    className="text-red-600 hover:text-red-700 hover:border-red-300"
+                    className="text-red-600 border-red-200 hover:bg-red-50"
                   >
                     Delete
                   </Button>
                 </div>
               </div>
-            </Card>
+            </div>
           ))
         )}
       </div>
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-2 mt-6">
+        <div className="flex justify-center items-center gap-4 mt-8">
           <Button
             onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
             variant="outline"
             size="sm"
+            className="hover:bg-gray-50 border-gray-200"
           >
             Previous
           </Button>
           
-          <span className="text-sm text-gray-600">
+          <span className="text-sm font-medium text-gray-700 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-lg border border-gray-200/50">
             Page {currentPage} of {totalPages}
           </span>
           
@@ -238,6 +258,7 @@ const ChallengeList: React.FC<ChallengeListProps> = ({ onEdit, onDelete, onView 
             disabled={currentPage === totalPages}
             variant="outline"
             size="sm"
+            className="hover:bg-gray-50 border-gray-200"
           >
             Next
           </Button>

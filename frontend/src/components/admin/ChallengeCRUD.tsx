@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Button } from '../ui/button';
 import ChallengeForm from './ChallengeForm';
 import ChallengeList from './ChallengeList';
 import ChallengeView from './ChallengeView';
@@ -228,105 +227,115 @@ const ChallengeCRUD: React.FC = () => {
     <div className="space-y-6">
       {/* Messages */}
       {successMessage && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-          {successMessage}
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <p className="text-green-800">{successMessage}</p>
         </div>
       )}
       
       {errorMessage && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          {errorMessage}
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-800">{errorMessage}</p>
         </div>
       )}
 
-      {/* Header */}
-      {viewMode === 'list' && (
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Challenge Management</h2>
-            <p className="text-gray-600">Create, edit, and manage OASIS challenges</p>
-          </div>
-          <Button onClick={() => setViewMode('create')}>
-            Create New Challenge
-          </Button>
+      {/* Main Content Card */}
+      <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200/50">
+        {/* Header */}
+        <div className="px-6 py-5 border-b border-gray-200/50">
+          {viewMode === 'list' && (
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  Challenge Management
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">Create, edit, and manage OASIS challenges</p>
+              </div>
+              <button
+                onClick={() => setViewMode('create')}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-md hover:shadow-lg"
+              >
+                Create New Challenge
+              </button>
+            </div>
+          )}
+
+          {viewMode === 'create' && (
+            <div>
+              <h2 className="text-xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Create Challenge
+              </h2>
+              <p className="text-sm text-gray-500 mt-1">Add a new OASIS challenge to the platform</p>
+            </div>
+          )}
+
+          {viewMode === 'edit' && selectedChallenge && (
+            <div>
+              <h2 className="text-xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Edit Challenge
+              </h2>
+              <p className="text-sm text-gray-500 mt-1">Modify "{selectedChallenge.title}"</p>
+            </div>
+          )}
+
+          {viewMode === 'view' && selectedChallenge && (
+            <div>
+              <h2 className="text-xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                View Challenge
+              </h2>
+              <p className="text-sm text-gray-500 mt-1">Challenge details and information</p>
+            </div>
+          )}
         </div>
-      )}
 
-      {viewMode === 'create' && (
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Create Challenge</h2>
-            <p className="text-gray-600">Add a new OASIS challenge to the platform</p>
-          </div>
+        {/* Content */}
+        <div className="p-6">
+          {viewMode === 'list' && (
+            <ChallengeList
+              onEdit={handleEditChallenge}
+              onDelete={handleDeleteChallenge}
+              onView={handleViewChallenge}
+            />
+          )}
+
+          {viewMode === 'create' && (
+            <ChallengeForm
+              onSubmit={handleCreateChallenge}
+              onCancel={handleCancel}
+              isLoading={isLoading}
+            />
+          )}
+
+          {viewMode === 'edit' && selectedChallenge && (
+            <ChallengeForm
+              onSubmit={handleUpdateChallenge}
+              onCancel={handleCancel}
+              initialData={{
+                ...selectedChallenge,
+                startTime: selectedChallenge.startTime ? 
+                  new Date(selectedChallenge.startTime).toISOString().slice(0, 16) : '',
+                endTime: selectedChallenge.endTime ? 
+                  new Date(selectedChallenge.endTime).toISOString().slice(0, 16) : ''
+              }}
+              isLoading={isLoading}
+            />
+          )}
+
+          {viewMode === 'view' && selectedChallenge && (
+            <ChallengeView
+              challenge={selectedChallenge}
+              onEdit={() => setViewMode('edit')}
+              onClose={handleCancel}
+            />
+          )}
         </div>
-      )}
-
-      {viewMode === 'edit' && selectedChallenge && (
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Edit Challenge</h2>
-            <p className="text-gray-600">Modify "{selectedChallenge.title}"</p>
-          </div>
-        </div>
-      )}
-
-      {viewMode === 'view' && selectedChallenge && (
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">View Challenge</h2>
-            <p className="text-gray-600">Challenge details and information</p>
-          </div>
-        </div>
-      )}
-
-      {/* Content */}
-      <div>
-        {viewMode === 'list' && (
-          <ChallengeList
-            onEdit={handleEditChallenge}
-            onDelete={handleDeleteChallenge}
-            onView={handleViewChallenge}
-          />
-        )}
-
-        {viewMode === 'create' && (
-          <ChallengeForm
-            onSubmit={handleCreateChallenge}
-            onCancel={handleCancel}
-            isLoading={isLoading}
-          />
-        )}
-
-        {viewMode === 'edit' && selectedChallenge && (
-          <ChallengeForm
-            onSubmit={handleUpdateChallenge}
-            onCancel={handleCancel}
-            initialData={{
-              ...selectedChallenge,
-              startTime: selectedChallenge.startTime ? 
-                new Date(selectedChallenge.startTime).toISOString().slice(0, 16) : '',
-              endTime: selectedChallenge.endTime ? 
-                new Date(selectedChallenge.endTime).toISOString().slice(0, 16) : ''
-            }}
-            isLoading={isLoading}
-          />
-        )}
-
-        {viewMode === 'view' && selectedChallenge && (
-          <ChallengeView
-            challenge={selectedChallenge}
-            onEdit={() => setViewMode('edit')}
-            onClose={handleCancel}
-          />
-        )}
       </div>
 
       {/* Loading overlay */}
       {isLoading && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg flex items-center gap-3">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-red-600"></div>
-            <span>Processing...</span>
+          <div className="bg-white p-6 rounded-lg shadow-lg flex items-center gap-3">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+            <span className="text-gray-700">Processing...</span>
           </div>
         </div>
       )}
