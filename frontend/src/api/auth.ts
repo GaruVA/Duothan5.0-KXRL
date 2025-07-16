@@ -106,4 +106,37 @@ export const challengesAPI = {
   }
 };
 
+// Judge0 API functions for code execution
+export const judge0API = {
+  getLanguages: async (): Promise<any> => {
+    const response = await api.get('/judge0/languages');
+    return response.data;
+  },
+
+  submitCode: async (submission: {
+    source_code: string;
+    language_id: number;
+    stdin?: string;
+    expected_output?: string;
+    wait?: boolean;
+  }): Promise<any> => {
+    const response = await api.post('/judge0/submit', submission);
+    return response.data;
+  },
+
+  getSubmission: async (token: string, fields?: string): Promise<any> => {
+    const params = fields ? `?fields=${fields}` : '';
+    const response = await api.get(`/judge0/submission/${token}${params}`);
+    return response.data;
+  },
+
+  pollSubmission: async (token: string, maxAttempts?: number, interval?: number): Promise<any> => {
+    const response = await api.post(`/judge0/poll/${token}`, {
+      maxAttempts,
+      interval
+    });
+    return response.data;
+  }
+};
+
 export default api;

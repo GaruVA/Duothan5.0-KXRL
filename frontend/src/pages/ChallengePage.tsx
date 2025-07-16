@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { challengesAPI } from '../api/auth';
+import { challengesAPI, judge0API } from '../api/auth';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
+import { Textarea } from '../components/ui/textarea';
+import { Select } from '../components/ui/select';
 
 interface TestCase {
   input: string;
@@ -63,6 +65,16 @@ const ChallengePage = () => {
   const [error, setError] = useState('');
   const [showHints, setShowHints] = useState(false);
   const [usedHints, setUsedHints] = useState<number[]>([]);
+  
+  // Code executor state
+  const [code, setCode] = useState('');
+  const [selectedLanguage, setSelectedLanguage] = useState<number>(71); // Default to Python
+  const [input, setInput] = useState('');
+  const [output, setOutput] = useState('');
+  const [executionResult, setExecutionResult] = useState<any>(null);
+  const [isExecuting, setIsExecuting] = useState(false);
+  const [languages, setLanguages] = useState<any[]>([]);
+  
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -108,6 +120,80 @@ const ChallengePage = () => {
     navigate('/login');
   };
 
+  // Code execution functions
+  const handleExecuteCode = async () => {
+    if (!code.trim()) {
+      alert('Please enter some code to execute');
+      return;
+    }
+
+    setIsExecuting(true);
+    setOutput('');
+    setExecutionResult(null);
+
+    try {
+      // Submit code to Judge0
+      const submission = {
+        source_code: code,
+        language_id: selectedLanguage,
+        stdin: input,
+        wait: false
+      };
+
+      const submitResult = await judge0API.submitCode(submission);
+      
+      if (submitResult.token) {
+        // Poll for results
+        const result = await judge0API.pollSubmission(submitResult.token, 30, 1000);
+        setExecutionResult(result);
+        
+        if (result.stdout) {
+          setOutput(result.stdout);
+        } else if (result.stderr) {
+          setOutput(`Error: ${result.stderr}`);
+        } else if (result.compile_output) {
+          setOutput(`Compilation Error: ${result.compile_output}`);
+        } else {
+          setOutput(`Status: ${result.status?.description || 'Unknown error'}`);
+        }
+      } else {
+        setOutput('Error: Failed to submit code');
+      }
+    } catch (error: any) {
+      console.error('Execution error:', error);
+      setOutput(`Error: ${error.response?.data?.message || error.message || 'Failed to execute code'}`);
+    } finally {
+      setIsExecuting(false);
+    }
+  };
+
+  const getStatusColor = (status: any) => {
+    if (!status) return 'text-gray-500';
+    
+    switch (status.id) {
+      case 3: // Accepted
+        return 'text-green-600';
+      case 4: // Wrong Answer
+        return 'text-red-600';
+      case 5: // Time Limit Exceeded
+        return 'text-yellow-600';
+      case 6: // Compilation Error
+        return 'text-red-600';
+      default:
+        return 'text-gray-500';
+    }
+  };
+
+  // Load available languages
+  const loadLanguages = async () => {
+    try {
+      const langs = await judge0API.getLanguages();
+      setLanguages(langs);
+    } catch (error) {
+      console.error('Failed to load languages:', error);
+    }
+  };
+
   useEffect(() => {
     const fetchChallenge = async () => {
       if (!id) {
@@ -127,6 +213,7 @@ const ChallengePage = () => {
     };
 
     fetchChallenge();
+    loadLanguages();
   }, [id]);
 
   if (loading) {
@@ -471,6 +558,153 @@ const ChallengePage = () => {
           </div>
         </div>
       </main>
+
+      {/* Code Executor Section */}
+      <section className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div className="px-4 py-6 sm:px-0">
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-2xl flex items-center">
+                <svg className="h-6 w-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                </svg>
+                Code Executor
+              </CardTitle>
+              <p className="text-gray-600">Write and test your solution here</p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Code Editor Side */}
+                <div className="space-y-4">
+                  {/* Language Selector */}
+                  <div>
+                    <label htmlFor="language" className="block text-sm font-medium text-gray-700 mb-2">
+                      Programming Language
+                    </label>
+                    <Select
+                      value={selectedLanguage.toString()}
+                      onChange={(e) => setSelectedLanguage(parseInt(e.target.value))}
+                    >
+                      {languages.map((lang) => (
+                        <option key={lang.id} value={lang.id}>
+                          {lang.name}
+                        </option>
+                      ))}
+                    </Select>
+                  </div>
+
+                  {/* Code Input */}
+                  <div>
+                    <label htmlFor="code" className="block text-sm font-medium text-gray-700 mb-2">
+                      Source Code
+                    </label>
+                    <Textarea
+                      id="code"
+                      value={code}
+                      onChange={(e) => setCode(e.target.value)}
+                      placeholder="Write your code here..."
+                      className="h-80 font-mono text-sm"
+                    />
+                  </div>
+
+                  {/* Input */}
+                  <div>
+                    <label htmlFor="input" className="block text-sm font-medium text-gray-700 mb-2">
+                      Input (stdin)
+                    </label>
+                    <Textarea
+                      id="input"
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      placeholder="Enter input for your program..."
+                      className="h-32 font-mono text-sm"
+                    />
+                  </div>
+
+                  {/* Execute Button */}
+                  <Button
+                    onClick={handleExecuteCode}
+                    disabled={isExecuting}
+                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    {isExecuting ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Executing...
+                      </>
+                    ) : (
+                      <>
+                        <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h1m4 0h1" />
+                        </svg>
+                        Run Code
+                      </>
+                    )}
+                  </Button>
+                </div>
+
+                {/* Output Side */}
+                <div className="space-y-4">
+                  {/* Execution Status */}
+                  {executionResult && (
+                    <div className="mb-4">
+                      <h3 className="text-sm font-medium text-gray-700 mb-2">Execution Status</h3>
+                      <div className="bg-gray-50 p-3 rounded-md">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium">Status:</span>
+                          <Badge className={`${getStatusColor(executionResult.status)} bg-gray-100`}>
+                            {executionResult.status?.description || 'Unknown'}
+                          </Badge>
+                        </div>
+                        {executionResult.time && (
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium">Execution Time:</span>
+                            <span className="text-sm text-gray-600">{executionResult.time}s</span>
+                          </div>
+                        )}
+                        {executionResult.memory && (
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium">Memory Used:</span>
+                            <span className="text-sm text-gray-600">{executionResult.memory} KB</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Output */}
+                  <div>
+                    <label htmlFor="output" className="block text-sm font-medium text-gray-700 mb-2">
+                      Output
+                    </label>
+                    <div className="w-full h-80 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 font-mono text-sm overflow-auto">
+                      {output ? (
+                        <pre className="whitespace-pre-wrap text-gray-800">{output}</pre>
+                      ) : (
+                        <div className="text-gray-400 italic">Output will appear here after code execution...</div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Additional Info */}
+                  <div className="text-xs text-gray-500 space-y-1">
+                    <p><strong>Tips:</strong></p>
+                    <ul className="list-disc list-inside space-y-1">
+                      <li>Use the same input format as described in the challenge</li>
+                      <li>Your output should match the expected output format</li>
+                      <li>Consider time and memory limits when writing your solution</li>
+                      <li>Debug with simple test cases first</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
     </div>
   );
 };
