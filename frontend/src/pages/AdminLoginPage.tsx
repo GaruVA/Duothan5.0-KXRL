@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const AdminLoginPage = () => {
   const [formData, setFormData] = useState({
@@ -32,21 +33,18 @@ const AdminLoginPage = () => {
       return;
     }
 
-    // For now, we'll just show a placeholder message
-    // In a real implementation, you would call an admin authentication API
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api';
+      const response = await axios.post(`${API_BASE_URL}/admin/login`, formData);
       
-      // Placeholder logic - in real implementation, verify admin credentials
-      if (formData.email === 'admin@oasis.com' && formData.password === 'admin') {
-        // Navigate to admin dashboard (to be implemented)
-        navigate('/admin/dashboard');
-      } else {
-        setFormError('Invalid admin credentials');
-      }
-    } catch (error) {
-      setFormError('An unexpected error occurred');
+      // Store admin authentication
+      localStorage.setItem('adminToken', 'admin-authenticated');
+      localStorage.setItem('adminData', JSON.stringify(response.data.admin));
+      
+      // Navigate to admin dashboard
+      navigate('/admin/dashboard');
+    } catch (error: any) {
+      setFormError(error.response?.data?.message || 'Invalid admin credentials');
     } finally {
       setIsLoading(false);
     }

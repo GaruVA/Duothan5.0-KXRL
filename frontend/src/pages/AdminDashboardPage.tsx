@@ -1,6 +1,15 @@
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const AdminDashboardPage = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Clear admin authentication
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminData');
+    navigate('/admin/login');
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="bg-white shadow">
@@ -19,12 +28,12 @@ const AdminDashboardPage = () => {
                 <p className="text-sm text-gray-500">Administrative Control Panel</p>
               </div>
             </div>
-            <Link
-              to="/admin/login"
+            <button
+              onClick={handleLogout}
               className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
             >
               Logout
-            </Link>
+            </button>
           </div>
         </div>
       </div>

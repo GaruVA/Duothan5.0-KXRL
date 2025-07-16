@@ -2,8 +2,12 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const Team = require('../models/Team');
 const authenticateToken = require('../middleware/auth');
+const { authLimiter } = require('../middleware/rateLimiter');
 
 const router = express.Router();
+
+// Apply rate limiting to auth routes
+router.use(authLimiter);
 
 // @route   POST /api/auth/register
 // @desc    Register a new team
