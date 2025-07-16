@@ -148,6 +148,28 @@ const challengeSchema = new mongoose.Schema({
   updatedAt: {
     type: Date,
     default: Date.now
+  },
+  // Buildathon-specific fields
+  flag: {
+    type: String,
+    required: true
+  },
+  buildathonProblem: {
+    description: {
+      type: String,
+      required: true
+    },
+    requirements: {
+      type: String,
+      required: true
+    },
+    deliverables: [{
+      type: String
+    }],
+    timeLimit: {
+      type: Number,
+      default: 24 // hours
+    }
   }
 }, {
   timestamps: true

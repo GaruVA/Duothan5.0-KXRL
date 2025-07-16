@@ -5,6 +5,8 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import AdminTeamsPage from './pages/AdminTeamsPage';
+import AdminChallengesPage from './pages/AdminChallengesPage';
 import DashboardPage from './pages/DashboardPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminProtectedRoute from './components/AdminProtectedRoute';
@@ -25,6 +27,22 @@ function App() {
               element={
                 <AdminProtectedRoute>
                   <AdminDashboardPage />
+                </AdminProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/teams" 
+              element={
+                <AdminProtectedRoute>
+                  <AdminTeamsPage />
+                </AdminProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/challenges" 
+              element={
+                <AdminProtectedRoute>
+                  <AdminChallengesPage />
                 </AdminProtectedRoute>
               } 
             />
