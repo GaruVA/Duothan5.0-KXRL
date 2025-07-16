@@ -15,6 +15,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/challenges', require('./routes/challenges'));
 app.use('/api/submissions', require('./routes/submissions'));
+app.use('/api/judge0', require('./routes/judge0'));
 
 // MongoDB connection
 mongoose.connect(process.env.MONGODB_URI)

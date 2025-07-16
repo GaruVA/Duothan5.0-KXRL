@@ -5,7 +5,10 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "server": "nodemon src/server.js"
+    "server": "nodemon src/server.js",
+    "seed": "node src/seeders/challengeSeeder.js",
+    "seed:challenges": "node src/seeders/challengeSeeder.js",
+    "test:judge0": "node test-judge0.js"
   },
   "keywords": [],
   "author": "",
