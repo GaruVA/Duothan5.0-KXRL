@@ -369,22 +369,26 @@ router.post('/:id/submit-flag', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Challenge is not active' });
     }
 
-    // Verify flag
-    if (flag.trim() === challenge.flag.trim()) {
-      // Flag is correct, check if team has solved the algorithmic challenge
-      const hasCorrectSubmission = await Submission.findOne({
-        teamId: req.team._id,
-        challengeId: challengeId,
-        isCorrect: true
+    // Check if team has solved the algorithmic challenge first
+    const correctSubmission = await Submission.findOne({
+      teamId: req.team._id,
+      challengeId: challengeId,
+      isCorrect: true
+    });
+
+    if (!correctSubmission) {
+      return res.status(400).json({ 
+        error: 'You must solve the algorithmic challenge first before submitting the flag' 
       });
+    }
 
-      if (!hasCorrectSubmission) {
-        return res.status(400).json({ 
-          error: 'You must solve the algorithmic challenge first before submitting the flag' 
-        });
-      }
+    // Get the expected output from the correct submission
+    const expectedOutput = correctSubmission.stdout ? correctSubmission.stdout.trim() : '';
+    const expectedFlag = `CTF{${expectedOutput}}`;
 
-      // Flag is correct and team has solved the challenge
+    // Verify flag format and content
+    if (flag.trim() === expectedFlag) {
+      // Flag is correct
       res.json({
         success: true,
         message: 'Flag verified successfully! Buildathon challenge unlocked.',
@@ -394,7 +398,7 @@ router.post('/:id/submit-flag', authenticateToken, async (req, res) => {
       // Flag is incorrect
       res.status(400).json({
         success: false,
-        error: 'Incorrect flag. Please try again.'
+        error: `Incorrect flag. Expected format: CTF{output_from_your_solution}`
       });
     }
   } catch (error) {

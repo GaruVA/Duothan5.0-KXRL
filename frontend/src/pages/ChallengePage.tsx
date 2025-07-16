@@ -633,7 +633,7 @@ const ChallengePage = () => {
                       id="flag"
                       value={flag}
                       onChange={(e) => setFlag(e.target.value)}
-                      placeholder="CTF{...}"
+                      placeholder="CTF{your_code_output}"
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 font-mono"
                       disabled={isSubmittingFlag}
                     />
@@ -691,9 +691,10 @@ const ChallengePage = () => {
                     <div>
                       <h4 className="text-sm font-medium text-blue-800 mb-1">How to get the flag:</h4>
                       <ul className="text-sm text-blue-700 space-y-1">
-                        <li>• First, solve the algorithmic challenge above using the code executor</li>
-                        <li>• The flag is typically hidden in the problem description, test cases, or revealed after solving</li>
-                        <li>• Flags usually follow the format: CTF{"{...}"}</li>
+                        <li>• First, solve the algorithmic challenge using the code executor below</li>
+                        <li>• Get the correct output from your solution</li>
+                        <li>• Format the flag as: CTF{"{your_output}"}</li>
+                        <li>• Example: if output is "Hello World", flag is CTF{"{Hello World}"}</li>
                         <li>• Once verified, you'll unlock the Buildathon challenge</li>
                       </ul>
                     </div>
